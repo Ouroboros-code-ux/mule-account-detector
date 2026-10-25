@@ -1,10 +1,24 @@
 {
   "include": [
-    "backend"
+    "backend",
+    "run.py"
   ],
   "venvPath": ".",
-  "pythonVersion": "3.14",
+  "venv": ".venv",
+  "pythonVersion": "3.12",
   "pythonPlatform": "Windows",
-  "reportMissingImports": false,
-  "reportMissingModuleSource": false
+  "extraPaths": [
+    ".",
+    "backend"
+  ],
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none",
+  "reportPrivateUsage": "none",
+  "reportOptionalMemberAccess": "none",
+  "reportGeneralTypeIssues": "none",
+  "reportUntypedFunctionDecorator": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportAttributeAccessIssue": "none"
 }

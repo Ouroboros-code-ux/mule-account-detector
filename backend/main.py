@@ -1,13 +1,24 @@
+import sys
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
-from slowapi import _rate_limit_exceeded_handler
 
-from .limiter import limiter
-from .database import init_db
-from .routers import auth, web, mule_routes, complaint_routes
+# Add project root to sys.path so imports resolve cleanly in any IDE or runner
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+try:
+    from backend.limiter import limiter
+    from backend.database import init_db
+    from backend.routers import auth, web, mule_routes, complaint_routes
+except ImportError:
+    from .limiter import limiter
+    from .database import init_db
+    from .routers import auth, web, mule_routes, complaint_routes
 
 # Initialize DB for investigator users
 init_db()
@@ -20,7 +31,13 @@ app = FastAPI(
 )
 
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Rate limit exceeded. Please slow down your requests."}
+    )
 
 # Mount root directory for static assets
 app.mount("/static", StaticFiles(directory="."), name="static")
