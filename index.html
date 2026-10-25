@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuleShield AI | Financial Crime & Mule Network Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <style>
+        :root {
+            --bg-canvas: #0b0f17;
+            --bg-surface: #111827;
+            --bg-surface-elevated: #1a2333;
+            --bg-surface-hover: #222d42;
+            
+            --border-default: #1f2937;
+            --border-subtle: #2d3748;
+            --border-active: #3b82f6;
+
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --text-tertiary: #6b7280;
+
+            --brand-blue: #2563eb;
+            --brand-blue-soft: #1d4ed8;
+            --status-danger: #dc2626;
+            --status-danger-bg: rgba(220, 38, 38, 0.12);
+            --status-warning: #d97706;
+            --status-warning-bg: rgba(217, 119, 6, 0.12);
+            --status-success: #059669;
+            --status-success-bg: rgba(5, 150, 105, 0.12);
+            --status-purple: #7c3aed;
+            --status-purple-bg: rgba(124, 58, 237, 0.12);
+
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Top Navigation Bar */
+        header {
+            height: 56px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            flex-shrink: 0;
+            z-index: 40;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: #1e293b;
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--brand-blue);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .brand-name {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-tag {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            background: #1e293b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border-default);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            padding: 4px 10px;
+            width: 360px;
+            transition: border-color 0.15s ease;
+        }
+
+        .search-container:focus-within {
+            border-color: var(--brand-blue);
+        }
+
+        .search-container input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            width: 100%;
+        }
+
+        .search-container input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-default);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: var(--text-primary);
+            background: var(--bg-surface);
+        }
+
+        .btn:hover {
+            background: var(--bg-surface-elevated);
+            border-color: var(--border-subtle);
+        }
+
+        .btn-primary {
+            background: var(--brand-blue);
+            border-color: var(--brand-blue);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-blue-soft);
+            border-color: var(--brand-blue-soft);
+        }
+
+        /* Sub-header Metrics Strip */
+        .metrics-strip {
+            height: 38px;
+            background: #0d131f;
+            border-bottom: 1px solid var(--border-default);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 28px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .strip-metric {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .strip-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .tag-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .tag-danger { background: var(--status-danger-bg); color: #ef4444; border: 1px solid rgba(220, 38, 38, 0.3); }
+        .tag-warning { background: var(--status-warning-bg); color: #f59e0b; border: 1px solid rgba(217, 119, 6, 0.3); }
+        .tag-success { background: var(--status-success-bg); color: #10b981; border: 1px solid rgba(5, 150, 105, 0.3); }
+
+        /* Workspace 3-Column Layout */
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 310px 1fr 360px;
+            height: calc(100vh - 94px);
+            overflow: hidden;
+            width: 100%;
+        }
+
+        /* Left Panel */
+        .panel-left {
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border-default);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .tab-bar {
+            display: flex;
+            border-bottom: 1px solid var(--border-default);
+            background: #0d131f;
+            flex-shrink: 0;
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 10px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            color: var(--text-secondary);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .tab-item.active {
+            color: #ffffff;
+            border-bottom-color: var(--brand-blue);
+            background: var(--bg-surface);
+        }
+
+        .scroll-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .scroll-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .scroll-list::-webkit-scrollbar-thumb {
+            background: var(--border-default);
+            border-radius: 4px;
+        }
+
+        .lead-card {
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .lead-card:hover {
+            border-color: var(--border-subtle);
+            background: #141c2b;
+        }
+
+        .lead-card.selected {
+            border-color: var(--brand-blue);
+            background: #131d31;
+        }
+
+        .lead-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .acct-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .lead-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            line-height: 1.35;
+        }
+
+        .lead-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-tertiary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Center Panel: Graph & Stream */
+        .panel-center {
+            display: flex;
+            flex-direction: column;
+            background: #090d14;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .graph-nav {
+            position: absolute;
+            top: 12px;
+            left: 14px;
+            z-index: 10;
+            display: flex;
+            gap: 6px;
+            background: rgba(17, 24, 39, 0.95);
+            padding: 4px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-default);
+        }
+
+        .graph-legend-box {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            z-index: 10;
+            background: rgba(17, 24, 39, 0.95);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-default);
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+
+        .legend-chip {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+        }
+
+        #cy-viewport {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Bottom Drawer: Transaction Logs */
+        .log-drawer {
+            height: 170px;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border-default);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .drawer-bar {
+            padding: 6px 14px;
+            background: #0d131f;
+            border-bottom: 1px solid var(--border-default);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-wrap {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .table-wrap::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .table-wrap::-webkit-scrollbar-thumb {
+            background: var(--border-default);
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: left;
+        }
+
+        .log-table th {
+            padding: 5px 12px;
+            color: var(--text-tertiary);
+            font-weight: 600;
+            background: #0d131f;
+            position: sticky;
+            top: 0;
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        .log-table td {
+            padding: 5px 12px;
+            border-bottom: 1px solid rgba(31, 41, 55, 0.6);
+            color: var(--text-secondary);
+        }
+
+        .log-table tr:hover td {
+            background: rgba(37, 99, 235, 0.06);
+            color: var(--text-primary);
+        }
+
+        /* Right Panel: Intelligence Dossier & XAI */
+        .panel-right {
+            background: var(--bg-surface);
+            border-left: 1px solid var(--border-default);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 16px;
+            gap: 16px;
+        }
+
+        .panel-right::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .panel-right::-webkit-scrollbar-thumb {
+            background: var(--border-default);
+        }
+
+        .dossier-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .dossier-id {
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: #ffffff;
+        }
+
+        .dossier-sub {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        /* Compact Risk Assessment Box */
+        .risk-box {
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .risk-score-display {
+            width: 54px;
+            height: 54px;
+            border-radius: var(--radius-sm);
+            background: #181d28;
+            border: 2px solid #ef4444;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .score-digit {
+            font-size: 20px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1;
+            color: #ffffff;
+        }
+
+        .score-caption {
+            font-size: 8px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+        }
+
+        .risk-summary-text {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* 2x2 Forensic Metrics */
+        .forensic-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .grid-cell {
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+        }
+
+        .cell-label {
+            font-size: 10px;
+            color: var(--text-tertiary);
+            margin-bottom: 2px;
+        }
+
+        .cell-value {
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        /* XAI Indicators Section */
+        .section-header {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .indicator-item {
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .item-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .item-body {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Active Learning / Feedback */
+        .feedback-container {
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn-group-feedback {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .btn-feedback {
+            padding: 7px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-default);
+            cursor: pointer;
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+
+        .btn-feedback:hover {
+            color: #ffffff;
+            background: var(--bg-surface-elevated);
+        }
+
+        .btn-feedback.confirm:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .btn-feedback.dispute:hover {
+            border-color: var(--brand-blue);
+            color: #60a5fa;
+        }
+
+        /* Modal Backdrop and Box */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            width: 440px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .modal-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .modal-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .modal-input, .modal-select {
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            padding: 6px 10px;
+            outline: none;
+        }
+
+        .modal-input:focus, .modal-select:focus {
+            border-color: var(--brand-blue);
+        }
+
+        /* Toast notification */
+        .toast-msg {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--brand-blue);
+            color: #ffffff;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="brand-section">
+            <div class="brand-icon">MS</div>
+            <div class="brand-name">
+                MuleShield AI
+                <span class="brand-tag">Graph Intelligence</span>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <span style="color: var(--text-tertiary); font-size: 11px; font-weight:600;">FIND:</span>
+            <input type="text" id="target-search-input" placeholder="Search account (e.g. ACC_MULE_ALPHA, ACC_SMURF_BOSS)..." value="ACC_MULE_ALPHA">
+            <button class="btn btn-primary" onclick="triggerAccountScan()" style="padding: 3px 8px; font-size: 11px;">Scan</button>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn" onclick="openInjectModal()" style="border-color: #3b82f6; color: #60a5fa;" title="Inject custom transaction">Inject Transaction</button>
+            <button class="btn" onclick="sampleFromCsv()" title="Load random rows from 800MB CSV">Sample 800MB Dataset</button>
+            <button class="btn" onclick="simulateAttack('layering')" title="Simulate Phishing to Mule to Cashout Chain">Simulate Layering</button>
+            <button class="btn" onclick="simulateAttack('smurfing')" title="Simulate Deposits Under $10,000">Simulate Smurfing</button>
+            <button class="btn" onclick="simulateAttack('normal')">Simulate Normal</button>
+            <a href="/api/docs" target="_blank" class="btn">API Docs</a>
+        </div>
+    </header>
+
+    <!-- Sub-header Metrics Strip -->
+    <div class="metrics-strip">
+        <div class="strip-metric">
+            <span>Monitored Accounts:</span>
+            <span class="strip-val" id="strip-accounts">...</span>
+        </div>
+        <div class="strip-metric">
+            <span>Prioritized Mule Leads:</span>
+            <span class="tag-badge tag-danger" id="strip-alerts">...</span>
+        </div>
+        <div class="strip-metric">
+            <span>Hardware Rings:</span>
+            <span class="strip-val" style="color: #a78bfa;" id="strip-rings">...</span>
+        </div>
+        <div class="strip-metric">
+            <span>Tracked Fraud:</span>
+            <span class="strip-val" style="color: #60a5fa;" id="strip-fraud">...</span>
+        </div>
+        <div class="strip-metric" style="margin-left: auto;">
+            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10b981; margin-right:4px;"></span>
+            <span style="color:#10b981; font-weight:500;">Active Pipeline Engine</span>
+        </div>
+    </div>
+
+    <!-- 3-Column Workspace -->
+    <div class="workspace">
+        
+        <!-- Left Panel: Ranked Leads & Cybercrime Reports -->
+        <div class="panel-left">
+            <div class="tab-bar">
+                <button class="tab-item active" id="tab-leads-btn" onclick="switchLeftTab('leads')">Prioritized Leads</button>
+                <button class="tab-item" id="tab-reports-btn" onclick="switchLeftTab('reports')">Cybercrime Reports</button>
+            </div>
+
+            <!-- Leads List -->
+            <div class="scroll-list" id="leads-container">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Reports List -->
+            <div class="scroll-list" id="reports-container" style="display: none;">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Center Panel: Sorted Hierarchical Cytoscape Trail & Streaming Table -->
+        <div class="panel-center">
+            <div class="graph-nav">
+                <button class="btn" onclick="applyHierarchicalLayout()" title="Sorted Left-to-Right Money Trail">Hierarchical View</button>
+                <button class="btn" onclick="applyPhysicsLayout()" title="Force Network">Network View</button>
+                <button class="btn" onclick="cy.fit()" title="Center view">Reset Zoom</button>
+            </div>
+
+            <div class="graph-legend-box">
+                <div class="legend-row"><div class="legend-chip" style="background: #2563eb;"></div> <span>Target Account</span></div>
+                <div class="legend-row"><div class="legend-chip" style="background: #dc2626;"></div> <span>Suspected Mule</span></div>
+                <div class="legend-row"><div class="legend-chip" style="background: #059669;"></div> <span>Victim / Source</span></div>
+                <div class="legend-row"><div class="legend-chip" style="background: #7c3aed;"></div> <span>Cashout / ATM</span></div>
+                <div class="legend-row"><div class="legend-chip" style="background: #d97706; border: 1px dashed #fff;"></div> <span>Shared Device</span></div>
+            </div>
+
+            <div id="cy-viewport"></div>
+
+            <!-- Bottom Drawer: Financial Logs -->
+            <div class="log-drawer">
+                <div class="drawer-bar">
+                    <span>Transaction Stream Ledger</span>
+                    <span style="font-size: 10px; color: var(--text-tertiary);">Click any row to trace sender</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th>TX ID</th>
+                                <th>SENDER</th>
+                                <th>RECEIVER</th>
+                                <th>AMOUNT</th>
+                                <th>CHANNEL</th>
+                                <th>LATENCY</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stream-tbody">
+                            <!-- Stream rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Intelligence Dossier & XAI -->
+        <div class="panel-right">
+            <div class="dossier-top">
+                <div>
+                    <div class="dossier-id" id="dossier-acct">...</div>
+                    <div class="dossier-sub" id="dossier-subtitle">Account Risk Intelligence</div>
+                </div>
+                <span class="tag-badge tag-danger" id="dossier-tier">EVALUATING</span>
+            </div>
+
+            <!-- Compact Risk Box -->
+            <div class="risk-box">
+                <div class="risk-score-display" id="risk-score-box">
+                    <div class="score-digit" id="dossier-score">--</div>
+                    <div class="score-caption">Risk</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; font-weight: 700; color: #ffffff; margin-bottom: 2px;" id="dossier-headline">Evaluating...</div>
+                    <div class="risk-summary-text" id="dossier-summary">
+                        Loading behavioral profile...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forensic Metrics 2x2 -->
+            <div class="forensic-grid">
+                <div class="grid-cell">
+                    <div class="cell-label">Pass-Through Time</div>
+                    <div class="cell-value" id="val-velocity" style="color: #ef4444;">--</div>
+                </div>
+                <div class="grid-cell">
+                    <div class="cell-label">In/Out Ratio</div>
+                    <div class="cell-value" id="val-ratio">--</div>
+                </div>
+                <div class="grid-cell">
+                    <div class="cell-label">Shared Device Ring</div>
+                    <div class="cell-value" id="val-devices" style="color: #a78bfa;">--</div>
+                </div>
+                <div class="grid-cell">
+                    <div class="cell-label">Model Confidence</div>
+                    <div class="cell-value" id="val-confidence">--</div>
+                </div>
+            </div>
+
+            <!-- XAI Indicators -->
+            <div class="section-header">
+                <span>Explainable AI (XAI) Indicators</span>
+            </div>
+
+            <div id="xai-container" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Generated indicator cards -->
+            </div>
+
+            <!-- Active Learning / Feedback -->
+            <div class="feedback-container">
+                <div style="font-size: 11px; font-weight: 600; color: var(--text-primary);">
+                    Active Learning Feedback
+                </div>
+                <div style="font-size: 10px; color: var(--text-tertiary); line-height: 1.35;">
+                    Submitting feedback logs training labels and immediately recalibrates heuristic weights.
+                </div>
+                <div class="btn-group-feedback">
+                    <button class="btn-feedback confirm" onclick="submitFeedback('CONFIRM_MULE')">Confirm Mule</button>
+                    <button class="btn-feedback dispute" onclick="submitFeedback('FALSE_POSITIVE')">Mark False Positive</button>
+                </div>
+            </div>
+
+            <button class="btn" onclick="window.print()" style="justify-content: center; font-size: 11px; padding: 7px;">
+                Export Case Dossier (PDF)
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Transaction Injection Modal -->
+    <div id="inject-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-title">
+                <span>Inject Custom Transaction (Test Unknown Data)</span>
+                <button onclick="closeInjectModal()" style="background:none; border:none; color:var(--text-tertiary); font-size:14px; cursor:pointer;">[Close]</button>
+            </div>
+            <div class="modal-field">
+                <label class="modal-label">Sender Account</label>
+                <input type="text" id="inj-sender" class="modal-input" value="ACC_UNKNOWN_SENDER">
+            </div>
+            <div class="modal-field">
+                <label class="modal-label">Receiver Account</label>
+                <input type="text" id="inj-receiver" class="modal-input" value="ACC_UNKNOWN_MULE">
+            </div>
+            <div class="modal-field">
+                <label class="modal-label">Amount ($ USD)</label>
+                <input type="number" id="inj-amount" class="modal-input" value="28500">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <div class="modal-field">
+                    <label class="modal-label">Velocity Score (1-25)</label>
+                    <input type="number" id="inj-velocity" class="modal-input" value="18">
+                </div>
+                <div class="modal-field">
+                    <label class="modal-label">Spending Deviation</label>
+                    <input type="number" step="0.1" id="inj-deviation" class="modal-input" value="3.5">
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <div class="modal-field">
+                    <label class="modal-label">Payment Channel</label>
+                    <select id="inj-channel" class="modal-select">
+                        <option value="wire">Wire</option>
+                        <option value="ACH">ACH</option>
+                        <option value="card">Card</option>
+                        <option value="UPI">UPI</option>
+                    </select>
+                </div>
+                <div class="modal-field">
+                    <label class="modal-label">Device Hash</label>
+                    <input type="text" id="inj-device" class="modal-input" value="D_NOVEL_DEVICE">
+                </div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+                <button class="btn" onclick="closeInjectModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitCustomTransaction()">Submit & Evaluate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast-msg">Action processed successfully</div>
+
+    <script>
+        let currentTarget = "ACC_MULE_ALPHA";
+        let cy = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initCytoscape();
+            refreshAllData();
+            inspectAccount(currentTarget);
+        });
+
+        async function refreshAllData() {
+            await Promise.all([
+                loadStats(),
+                loadLeads(),
+                loadReports(),
+                loadLogs()
+            ]);
+        }
+
+        // Dynamic System Stats Loader
+        async function loadStats() {
+            try {
+                const res = await fetch("/api/mule/stats");
+                const data = await res.json();
+                document.getElementById("strip-accounts").innerText = data.total_accounts;
+                document.getElementById("strip-rings").innerText = `${data.hardware_rings} Identified`;
+                document.getElementById("strip-fraud").innerText = `$${data.tracked_fraud_amount.toLocaleString()} Tracked`;
+            } catch (err) {
+                console.error("Stats error:", err);
+            }
+        }
+
+        // Cytoscape Configuration
+        function initCytoscape() {
+            cy = cytoscape({
+                container: document.getElementById('cy-viewport'),
+                elements: [],
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'label': 'data(label)',
+                            'color': '#d1d5db',
+                            'font-size': '10px',
+                            'font-family': 'JetBrains Mono',
+                            'text-valign': 'bottom',
+                            'text-margin-y': 4,
+                            'background-color': '#1f2937',
+                            'width': 28,
+                            'height': 28,
+                            'border-width': 1.5,
+                            'border-color': '#374151'
+                        }
+                    },
+                    {
+                        selector: 'node[type = "target"]',
+                        style: {
+                            'background-color': '#2563eb',
+                            'width': 36,
+                            'height': 36,
+                            'border-width': 2.5,
+                            'border-color': '#60a5fa'
+                        }
+                    },
+                    {
+                        selector: 'node[type = "mule"]',
+                        style: {
+                            'background-color': '#dc2626',
+                            'border-color': '#f87171'
+                        }
+                    },
+                    {
+                        selector: 'node[type = "victim"]',
+                        style: {
+                            'background-color': '#059669',
+                            'border-color': '#34d399'
+                        }
+                    },
+                    {
+                        selector: 'node[type = "cashout"]',
+                        style: {
+                            'background-color': '#7c3aed',
+                            'border-color': '#a78bfa',
+                            'shape': 'diamond',
+                            'width': 32,
+                            'height': 32
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 1.5,
+                            'line-color': '#374151',
+                            'target-arrow-color': '#4b5563',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier',
+                            'label': 'data(label)',
+                            'font-size': '9px',
+                            'color': '#9ca3af',
+                            'font-family': 'JetBrains Mono',
+                            'text-rotation': 'autorotate',
+                            'text-background-opacity': 0.85,
+                            'text-background-color': '#0b0f17',
+                            'text-background-padding': 2
+                        }
+                    },
+                    {
+                        selector: 'edge[edge_type = "shared_device"]',
+                        style: {
+                            'line-style': 'dashed',
+                            'line-color': '#d97706',
+                            'target-arrow-shape': 'none',
+                            'width': 1.5,
+                            'label': 'SAME DEVICE'
+                        }
+                    }
+                ]
+            });
+
+            // Interactive Click-to-Scan on node
+            cy.on('tap', 'node', (evt) => {
+                const node = evt.target;
+                const acct = node.id();
+                if (acct && !acct.includes("ATM")) {
+                    inspectAccount(acct);
+                }
+            });
+        }
+
+        // Sorted Left-to-Right Money Trail Layout
+        function applyHierarchicalLayout() {
+            const nodes = cy.nodes();
+            const victims = [];
+            const targetNodes = [];
+            const layering = [];
+            const cashout = [];
+
+            nodes.forEach(n => {
+                const t = n.data('type');
+                if (t === 'victim') victims.push(n);
+                else if (t === 'target') targetNodes.push(n);
+                else if (t === 'cashout') cashout.push(n);
+                else layering.push(n);
+            });
+
+            const colWidth = 220;
+            const rowHeight = 70;
+            const startX = 80;
+            const centerY = 240;
+
+            victims.forEach((n, idx) => {
+                const offset = (idx - (victims.length - 1) / 2) * rowHeight;
+                n.animate({ position: { x: startX, y: centerY + offset }, duration: 300 });
+            });
+
+            targetNodes.forEach(n => {
+                n.animate({ position: { x: startX + colWidth, y: centerY }, duration: 300 });
+            });
+
+            layering.forEach((n, idx) => {
+                const offset = (idx - (layering.length - 1) / 2) * rowHeight;
+                n.animate({ position: { x: startX + colWidth * 2, y: centerY + offset }, duration: 300 });
+            });
+
+            cashout.forEach((n, idx) => {
+                const offset = (idx - (cashout.length - 1) / 2) * rowHeight;
+                n.animate({ position: { x: startX + colWidth * 3, y: centerY + offset }, duration: 300 });
+            });
+
+            setTimeout(() => cy.fit(null, 40), 350);
+        }
+
+        function applyPhysicsLayout() {
+            cy.layout({ name: 'cose', animate: true, padding: 40 }).run();
+        }
+
+        // Account Inspection & Traversal
+        async function inspectAccount(accountId) {
+            currentTarget = accountId;
+            document.getElementById("target-search-input").value = accountId;
+            document.getElementById("dossier-acct").innerText = accountId;
+
+            // 1. Fetch AI Risk Evaluation
+            try {
+                const res = await fetch(`/api/mule/scan/${accountId}`);
+                const data = await res.json();
+                renderDossier(data);
+            } catch (err) {
+                console.error("Scan error:", err);
+            }
+
+            // 2. Fetch Money Trail Graph
+            try {
+                const resGraph = await fetch(`/api/mule/graph/${accountId}`);
+                const graphData = await resGraph.json();
+                renderGraph(graphData);
+            } catch (err) {
+                console.error("Graph error:", err);
+            }
+        }
+
+        function renderDossier(data) {
+            document.getElementById("dossier-score").innerText = Math.round(data.risk_score);
+            const scoreBox = document.getElementById("risk-score-box");
+            const tierBadge = document.getElementById("dossier-tier");
+            const headline = document.getElementById("dossier-headline");
+            const summary = document.getElementById("dossier-summary");
+
+            let borderColor = "#10b981";
+            let tierClass = "tag-success";
+            if (data.risk_tier === "CRITICAL") {
+                borderColor = "#ef4444";
+                tierClass = "tag-danger";
+            } else if (data.risk_tier === "HIGH") {
+                borderColor = "#f59e0b";
+                tierClass = "tag-warning";
+            }
+
+            scoreBox.style.borderColor = borderColor;
+            tierBadge.className = `tag-badge ${tierClass}`;
+            tierBadge.innerText = `${data.risk_tier} RISK`;
+
+            headline.innerText = data.is_suspected_mule ? "Suspicious Mule Entity" : "Standard Account";
+            summary.innerText = data.summary;
+
+            document.getElementById("val-velocity").innerText = data.pass_through_velocity_hours !== null ? `${Math.round(data.pass_through_velocity_hours * 60)} Mins` : "N/A";
+            document.getElementById("val-ratio").innerText = `${Math.round(data.in_out_ratio * 100)}%`;
+            document.getElementById("val-devices").innerText = `${data.shared_device_accounts.length} Accounts`;
+            document.getElementById("val-confidence").innerText = `${Math.round(data.confidence * 100)}%`;
+
+            // Indicators List
+            const indContainer = document.getElementById("xai-container");
+            indContainer.innerHTML = "";
+
+            if (!data.indicators || data.indicators.length === 0) {
+                indContainer.innerHTML = `<div style="font-size:11px; color:var(--text-tertiary);">No high-risk behavioral anomalies recorded.</div>`;
+            } else {
+                data.indicators.forEach(ind => {
+                    const tagClass = ind.severity === "CRITICAL" ? "tag-danger" : (ind.severity === "HIGH" ? "tag-warning" : "tag-success");
+                    const card = document.createElement("div");
+                    card.className = "indicator-item";
+                    card.innerHTML = `
+                        <div class="item-top">
+                            <span class="item-title">${ind.title}</span>
+                            <span class="tag-badge ${tagClass}">${ind.severity}</span>
+                        </div>
+                        <div class="item-body">${ind.description}</div>
+                    `;
+                    indContainer.appendChild(card);
+                });
+            }
+        }
+
+        function renderGraph(graphData) {
+            cy.elements().remove();
+            const elements = [];
+
+            graphData.nodes.forEach(n => {
+                elements.push({
+                    group: 'nodes',
+                    data: {
+                        id: n.id,
+                        label: n.label,
+                        type: n.type,
+                        risk: n.risk_score
+                    }
+                });
+            });
+
+            graphData.edges.forEach((e, idx) => {
+                const label = e.amount > 0 ? `$${e.amount.toLocaleString()}` : '';
+                elements.push({
+                    group: 'edges',
+                    data: {
+                        id: `e_${idx}`,
+                        source: e.source,
+                        target: e.target,
+                        label: label,
+                        edge_type: e.edge_type
+                    }
+                });
+            });
+
+            cy.add(elements);
+            applyHierarchicalLayout();
+        }
+
+        // Left Tabs & Feed
+        function switchLeftTab(tab) {
+            const btnLeads = document.getElementById("tab-leads-btn");
+            const btnReports = document.getElementById("tab-reports-btn");
+            const cLeads = document.getElementById("leads-container");
+            const cReports = document.getElementById("reports-container");
+
+            if (tab === "leads") {
+                btnLeads.classList.add("active");
+                btnReports.classList.remove("active");
+                cLeads.style.display = "flex";
+                cReports.style.display = "none";
+            } else {
+                btnReports.classList.add("active");
+                btnLeads.classList.remove("active");
+                cReports.style.display = "flex";
+                cLeads.style.display = "none";
+            }
+        }
+
+        async function loadLeads() {
+            try {
+                const res = await fetch("/api/mule/alerts");
+                const data = await res.json();
+                const container = document.getElementById("leads-container");
+                container.innerHTML = "";
+
+                document.getElementById("strip-alerts").innerText = `${data.alerts.length} Flagged`;
+
+                data.alerts.forEach(al => {
+                    const tagClass = al.risk_tier === "CRITICAL" ? "tag-danger" : (al.risk_tier === "HIGH" ? "tag-warning" : "tag-success");
+                    const card = document.createElement("div");
+                    card.className = "lead-card";
+                    if (al.account_id === currentTarget) card.classList.add("selected");
+                    card.onclick = () => {
+                        document.querySelectorAll(".lead-card").forEach(c => c.classList.remove("selected"));
+                        card.classList.add("selected");
+                        inspectAccount(al.account_id);
+                    };
+
+                    card.innerHTML = `
+                        <div class="lead-header">
+                            <span class="acct-id">${al.account_id}</span>
+                            <span class="tag-badge ${tagClass}">${al.risk_score}</span>
+                        </div>
+                        <div class="lead-desc">${al.primary_indicator}</div>
+                        <div class="lead-footer">
+                            <span>In/Out: ${(al.in_out_ratio * 100).toFixed(0)}%</span>
+                            <span>Shared Dev: ${al.shared_devices_count}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                console.error("Leads error:", err);
+            }
+        }
+
+        async function loadReports() {
+            try {
+                const res = await fetch("/api/complaints/all");
+                const reports = await res.json();
+                const container = document.getElementById("reports-container");
+                container.innerHTML = "";
+
+                reports.forEach(r => {
+                    const card = document.createElement("div");
+                    card.className = "lead-card";
+                    card.onclick = () => {
+                        showToast(`Tracing fund trail for ${r.complaint_id}`);
+                        inspectAccount(r.suspect_account);
+                    };
+
+                    card.innerHTML = `
+                        <div class="lead-header">
+                            <span class="acct-id">${r.complaint_id}</span>
+                            <span class="tag-badge tag-danger">$${r.amount_lost.toLocaleString()}</span>
+                        </div>
+                        <div class="lead-desc"><strong>${r.crime_category}</strong><br>${r.evidence_notes}</div>
+                        <div class="lead-footer">
+                            <span>Victim: ${r.victim_account}</span>
+                            <span style="color:var(--brand-blue); font-weight:600;">Trace Trail -></span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                console.error("Reports error:", err);
+            }
+        }
+
+        async function loadLogs() {
+            try {
+                const res = await fetch("/api/mule/transactions?limit=20");
+                const txs = await res.json();
+                const tbody = document.getElementById("stream-tbody");
+                tbody.innerHTML = "";
+
+                txs.forEach(t => {
+                    const tr = document.createElement("tr");
+                    tr.style.cursor = "pointer";
+                    tr.onclick = () => inspectAccount(t.sender_account);
+
+                    const status = t.is_fraud ? 
+                        `<span style="color:#ef4444; font-weight:600;">${t.fraud_type || 'FLAGGED'}</span>` : 
+                        `<span style="color:#10b981;">NORMAL</span>`;
+
+                    tr.innerHTML = `
+                        <td>${t.transaction_id}</td>
+                        <td style="color:#ffffff;">${t.sender_account}</td>
+                        <td style="color:#60a5fa;">${t.receiver_account}</td>
+                        <td style="font-weight:600;">$${t.amount.toLocaleString()}</td>
+                        <td>${t.payment_channel.toUpperCase()}</td>
+                        <td>${t.time_since_last_transaction}s</td>
+                        <td>${status}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Logs error:", err);
+            }
+        }
+
+        function triggerAccountScan() {
+            const acct = document.getElementById("target-search-input").value.trim();
+            if (acct) {
+                inspectAccount(acct);
+            }
+        }
+
+        async function simulateAttack(type) {
+            showToast(`Generating ${type.toUpperCase()} attack flow...`);
+            try {
+                const res = await fetch("/api/mule/simulate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ scenario: type })
+                });
+                const data = await res.json();
+                
+                await refreshAllData();
+
+                if (data.target_account) {
+                    inspectAccount(data.target_account);
+                }
+                showToast(`Injected ${data.transactions_generated} transactions`);
+            } catch (err) {
+                console.error("Simulation error:", err);
+            }
+        }
+
+        async function submitFeedback(feedbackType) {
+            try {
+                const res = await fetch("/api/mule/feedback", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        account_id: currentTarget,
+                        feedback_type: feedbackType,
+                        notes: "Investigator verification from forensic workspace"
+                    })
+                });
+                const result = await res.json();
+                showToast(result.message);
+            } catch (err) {
+                console.error("Feedback error:", err);
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById("toast");
+            toast.innerText = msg;
+            toast.style.display = "block";
+            setTimeout(() => {
+                toast.style.display = "none";
+            }, 3000);
+        }
+
+        // Custom Transaction Injection Modal
+        function openInjectModal() {
+            document.getElementById("inject-modal").style.display = "flex";
+        }
+
+        function closeInjectModal() {
+            document.getElementById("inject-modal").style.display = "none";
+        }
+
+        async function submitCustomTransaction() {
+            const sender = document.getElementById("inj-sender").value.trim();
+            const receiver = document.getElementById("inj-receiver").value.trim();
+            const amount = parseFloat(document.getElementById("inj-amount").value);
+            const channel = document.getElementById("inj-channel").value;
+            const velocity = parseFloat(document.getElementById("inj-velocity").value);
+            const deviation = parseFloat(document.getElementById("inj-deviation").value);
+            const device = document.getElementById("inj-device").value.trim();
+
+            if (!sender || !receiver || isNaN(amount)) {
+                showToast("Please fill in sender, receiver, and amount.");
+                return;
+            }
+
+            try {
+                showToast("Injecting custom transaction...");
+                const res = await fetch("/api/mule/inject", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        sender_account: sender,
+                        receiver_account: receiver,
+                        amount: amount,
+                        payment_channel: channel,
+                        velocity_score: velocity,
+                        spending_deviation_score: deviation,
+                        device_hash: device
+                    })
+                });
+                const result = await res.json();
+                closeInjectModal();
+                showToast(`Injected. Receiver risk: ${result.receiver_evaluation.risk_score}/100`);
+                
+                await refreshAllData();
+                inspectAccount(receiver);
+            } catch (err) {
+                console.error("Injection error:", err);
+                showToast("Failed to inject transaction");
+            }
+        }
+
+        // Ingest from 800MB CSV
+        async function sampleFromCsv() {
+            showToast("Sampling random unseen records from 800MB CSV...");
+            try {
+                const res = await fetch("/api/mule/sample-csv?limit=25", { method: "POST" });
+                const data = await res.json();
+                await refreshAllData();
+                if (data.sample_accounts && data.sample_accounts.length > 0) {
+                    inspectAccount(data.sample_accounts[0]);
+                }
+                showToast(`Loaded ${data.rows_ingested} real records from 800MB CSV`);
+            } catch (err) {
+                console.error("CSV sample error:", err);
+                showToast("Failed to sample from CSV");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# Environment Variables (Keep secrets local!)
+.env
+.env.*
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Database
+*.db
+*.sqlite3
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Large Datasets (>100MB exceeds GitHub limits)
+*.csv
+*.mp4

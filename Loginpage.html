@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuleShield AI | Access Control</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #050608;
+            --card-bg: rgba(11, 22, 48, 0.9);
+            --primary-accent: #3b82f6;
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(59, 130, 246, 0.2);
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: var(--bg-color);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            overflow: hidden;
+            perspective: 1000px;
+            /* Added for 3D effect */
+        }
+
+        #video-bg {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -2;
+            object-fit: cover;
+            opacity: 0.4;
+        }
+
+        #video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(5, 6, 8, 0.8) 0%, rgba(5, 6, 8, 0.98) 100%);
+            z-index: -1;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8);
+            text-align: center;
+            transform-style: preserve-3d;
+            /* Allows internal elements to pop out slightly */
+        }
+
+        .logo-area {
+            transform: translateZ(30px);
+            /* 3D pop out */
+        }
+
+        .logo-area h1 {
+            font-size: 24px;
+            margin: 0;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-area p {
+            font-size: 10px;
+            color: var(--primary-accent);
+            opacity: 0.8;
+            margin-top: 5px;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+            transform: translateZ(20px);
+            /* 3D pop out */
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Interactive Glow Button */
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(25px);
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: var(--y, 50%);
+            left: var(--x, 50%);
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle closest-side, rgba(255, 255, 255, 0.4), transparent);
+            transition: width 0.2s ease, height 0.2s ease;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .login-btn:hover::before {
+            width: 250px;
+            height: 250px;
+        }
+
+        .login-btn:hover {
+            transform: translateZ(25px) translateY(-2px);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: translateZ(25px);
+        }
+
+        #error-msg {
+            color: var(--danger);
+            font-size: 11px;
+            margin-top: 15px;
+            min-height: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            transform: translateZ(10px);
+        }
+    </style>
+</head>
+
+<body>
+
+    <video id="video-bg" autoplay muted loop playsinline>
+        <source src="/static/bg3-video.mp4.mp4" type="video/mp4">
+    </video>
+    <div id="video-overlay"></div>
+
+    <div class="login-card" id="tilt-card">
+        <div class="logo-area">
+            <h1>MuleShield.AI</h1>
+            <p>Authorized Access Only</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Identifier</label>
+                <input type="text" id="username" placeholder="usr_..." required>
+            </div>
+
+            <div class="input-group">
+                <label>Secure Key</label>
+                <input type="password" id="password" placeholder="********" required>
+            </div>
+
+            <button type="submit" class="login-btn glow-btn" id="loginBtn">Initialize Session</button>
+
+        </form>
+
+        <div id="error-msg"></div>
+
+        <p style="font-size: 11px; margin-top: 25px; color: var(--text-muted); transform: translateZ(10px);">
+            Need access? <a href="/register"
+                style="color: var(--primary-accent); text-decoration: none; font-weight: 600;">Initialize Identity</a>
+        </p>
+    </div>
+
+    <script>
+        // 1. Initialize 3D Card Tilt
+        VanillaTilt.init(document.getElementById("tilt-card"), {
+            max: 4, speed: 400, glare: true, "max-glare": 0.15, gyroscope: true
+        });
+
+        // 2. Cursor-Tracking Button Glow
+        document.querySelectorAll('.glow-btn').forEach(btn => {
+            btn.addEventListener('mousemove', e => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                btn.style.setProperty('--x', x + 'px');
+                btn.style.setProperty('--y', y + 'px');
+            });
+        });
+
+
+
+        // 3. Server Logic (Untouched)
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const errorDiv = document.getElementById('error-msg');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            btn.disabled = true;
+            btn.innerText = "Authenticating...";
+            errorDiv.innerText = "";
+
+            try {
+                const isLocal = window.location.protocol === 'file:' || window.location.port === '5500' || window.location.port === '5501';
+                const API_BASE = isLocal ? 'http://127.0.0.1:8001' : '';
+                const response = await fetch(API_BASE + '/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('crypto_user', username);
+                    if (data.token) { localStorage.setItem('crypto_token', data.token); }
+
+                    btn.innerText = "Access Granted";
+                    setTimeout(() => {
+                        window.location.href = API_BASE ? (API_BASE + '/dashboard') : '/dashboard';
+                    }, 500);
+                } else {
+                    const data = await response.json();
+                    if (response.status === 403 && data.detail.includes("sign up again")) {
+                        errorDiv.innerHTML = `> Error: ${data.detail} <br><br>
+                        <a href="/register" style="color: var(--primary-accent); text-decoration: underline; cursor: pointer;">Go to Registration</a>`;
+                    } else {
+                        throw new Error(data.detail || "Authentication Failed");
+                    }
+                }
+            } catch (err) {
+                if (!errorDiv.innerHTML.includes("Go to Registration")) {
+                    errorDiv.innerText = "> Error: " + err.message;
+                }
+                btn.disabled = false;
+                btn.innerText = "Initialize Session";
+            }
+        });
+    </script>
+</body>
+
+</html>

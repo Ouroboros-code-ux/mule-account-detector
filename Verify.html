@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuleShield AI | Identity Verification</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050608;
+            --card-bg: rgba(11, 22, 48, 0.9);
+            --primary-accent: #3b82f6;
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(59, 130, 246, 0.2);
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: var(--bg-color);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        #video-bg {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -2;
+            object-fit: cover;
+            opacity: 0.3;
+        }
+
+        #video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(5, 6, 8, 0.8) 0%, rgba(5, 6, 8, 0.98) 100%);
+            z-index: -1;
+        }
+
+        .verify-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8);
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0 0 10px 0;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .action-btn {
+            display: inline-block;
+            padding: 14px 30px;
+            background: var(--primary-gradient);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5);
+        }
+
+        .status-success { color: var(--success); }
+        .status-error { color: var(--danger); }
+    </style>
+</head>
+
+<body>
+    <video id="video-bg" autoplay muted loop playsinline>
+        <source src="/static/bg3-video.mp4.mp4" type="video/mp4">
+    </video>
+    <div id="video-overlay"></div>
+
+    <div class="verify-card">
+        <div id="status-icon" class="icon">...</div>
+        <h1 id="status-title">Verifying Identity...</h1>
+        <p id="status-message">Please wait while we validate your credentials on the secure network.</p>
+        <div id="action-container" style="display: none;">
+            <a href="/login" class="action-btn">Return to Secure Login</a>
+        </div>
+    </div>
+
+    <script>
+        async function runVerification() {
+            const pathParts = window.location.pathname.split('/');
+            const token = pathParts[pathParts.length - 1];
+            
+            const title = document.getElementById('status-title');
+            const message = document.getElementById('status-message');
+            const icon = document.getElementById('status-icon');
+            const action = document.getElementById('action-container');
+
+            try {
+                const response = await fetch(`/api/verify/${token}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    icon.innerText = "SUCCESS";
+                    icon.className = "icon status-success";
+                    title.innerText = "Identity Verified";
+                    message.innerText = "Your account has been successfully activated. You now have full access to the MuleShield AI analytical suite.";
+                    action.style.display = "block";
+                } else {
+                    throw new Error(data.detail || "Verification failed");
+                }
+            } catch (err) {
+                icon.innerText = "FAILED";
+                icon.className = "icon status-error";
+                title.innerText = "Verification Failed";
+                message.innerText = err.message || "The verification link is invalid or has expired. Please request a new link or contact security support.";
+                action.style.display = "block";
+                action.querySelector('a').innerText = "Return to Registration";
+                action.querySelector('a').href = "/register";
+            }
+        }
+
+        // Delay slightly for effect
+        setTimeout(runVerification, 1500);
+    </script>
+</body>
+
+</html>
