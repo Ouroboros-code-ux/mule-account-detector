@@ -47,6 +47,12 @@ python run.py
 * **Interactive API Documentation (Swagger)**: [http://localhost:8001/api/docs](http://localhost:8001/api/docs)
 * **API Health Check**: [http://localhost:8001/api/health](http://localhost:8001/api/health)
 
+### 4. Demo Access Credentials
+When running locally or evaluating on any newly cloned machine, use the pre-configured credentials:
+* **Username**: `admin`
+* **Password**: `admin123`
+*(Alternative roles: `analyst` / `analyst123`, `demo` / `demo123`)*
+
 ---
 
 ## Core Forensic Capabilities

@@ -23,22 +23,27 @@ def init_db():
     
     db = SessionLocal()
     try:
-        existing_user = db.query(User).filter(User.username == 'sahil').first()
-        if not existing_user:
-            salt = bcrypt.gensalt()
-            admin_pw = os.getenv("ADMIN_PASSWORD")
-            if not admin_pw:
-                print("WARNING: ADMIN_PASSWORD is missing from environment. Using insecure dev password. Do not use in production!")
-                admin_pw = "4197546"
-            hashed_pw = bcrypt.hashpw(admin_pw.encode('utf-8'), salt)
-            
-            new_user = User(
-                username='sahil',
-                password=hashed_pw,
-                email='sahil@muleshield.ai',
-                is_verified=1
-            )
-            db.add(new_user)
-            db.commit()
+        users_to_seed = [
+            ("admin", os.getenv("ADMIN_PASSWORD") or "admin123", "admin@muleshield.ai"),
+            ("analyst", "analyst123", "analyst@muleshield.ai"),
+            ("demo", "demo123", "demo@muleshield.ai"),
+            ("sahil", "4197546", "sahil@muleshield.ai")
+        ]
+        for uname, pwd, email in users_to_seed:
+            existing = db.query(User).filter(User.username == uname).first()
+            if not existing:
+                salt = bcrypt.gensalt()
+                hashed_pw = bcrypt.hashpw(pwd.encode('utf-8'), salt)
+                new_user = User(
+                    username=uname,
+                    password=hashed_pw,
+                    email=email,
+                    is_verified=1
+                )
+                db.add(new_user)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Error seeding database users: {e}")
     finally:
         db.close()

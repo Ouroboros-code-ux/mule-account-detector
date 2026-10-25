@@ -194,13 +194,64 @@
             font-family: 'JetBrains Mono', monospace;
             transform: translateZ(10px);
         }
+
+        .demo-box {
+            background: rgba(30, 41, 59, 0.75);
+            border: 1px dashed rgba(59, 130, 246, 0.45);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            transform: translateZ(20px);
+        }
+
+        .demo-box:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--primary-accent);
+        }
+
+        .demo-tag {
+            font-size: 9px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary-accent);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .demo-tag span.badge {
+            background: rgba(59, 130, 246, 0.25);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #93c5fd;
+            font-size: 9px;
+        }
+
+        .demo-creds {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #cbd5e1;
+            margin-top: 6px;
+            display: flex;
+            gap: 14px;
+        }
+
+        .demo-creds code {
+            color: #60a5fa;
+            font-weight: 600;
+        }
     </style>
 </head>
 
 <body>
 
     <video id="video-bg" autoplay muted loop playsinline>
-        <source src="/static/bg3-video.mp4.mp4" type="video/mp4">
+        <source src="/static/background.mp4" type="video/mp4">
     </video>
     <div id="video-overlay"></div>
 
@@ -210,15 +261,26 @@
             <p>Authorized Access Only</p>
         </div>
 
+        <div class="demo-box" onclick="fillDemo('admin', 'admin123')" title="Click to auto-fill demo credentials">
+            <div class="demo-tag">
+                <span>Demo Access</span>
+                <span class="badge">Click to fill</span>
+            </div>
+            <div class="demo-creds">
+                <div>User: <code>admin</code></div>
+                <div>Pass: <code>admin123</code></div>
+            </div>
+        </div>
+
         <form id="loginForm">
             <div class="input-group">
                 <label>Identifier</label>
-                <input type="text" id="username" placeholder="usr_..." required>
+                <input type="text" id="username" value="admin" placeholder="admin" required>
             </div>
 
             <div class="input-group">
                 <label>Secure Key</label>
-                <input type="password" id="password" placeholder="********" required>
+                <input type="password" id="password" value="admin123" placeholder="admin123" required>
             </div>
 
             <button type="submit" class="login-btn glow-btn" id="loginBtn">Initialize Session</button>
@@ -250,9 +312,16 @@
             });
         });
 
+        // Demo Helper Function
+        function fillDemo(u, p) {
+            document.getElementById('username').value = u;
+            document.getElementById('password').value = p;
+            const btn = document.getElementById('loginBtn');
+            btn.style.transform = "translateZ(25px) scale(1.02)";
+            setTimeout(() => { btn.style.transform = "translateZ(25px)"; }, 300);
+        }
 
-
-        // 3. Server Logic (Untouched)
+        // 3. Server Logic
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('loginBtn');
